@@ -320,7 +320,77 @@ class TestApply:
         assert resp.status_code == 200
         data = resp.json()
         assert data["status"] == "ok"
-        assert data["bridges"] == 1
+        assert len(data["bridges"]) == 1
+        assert data["bridges"][0]["name"] == "Kitchen Bridge"
+        assert data["bridges"][0]["port"] == 21100
+        assert data["entity_count_per_bridge"]["Kitchen Bridge"] == 2
+        assert data["packages_configured"] is False
+
+    def test_apply_returns_multi_bridge_details(self, client, tmp_path):
+        config = {
+            "areas": {
+                "kitchen": {
+                    "area_id": "kitchen",
+                    "enabled": True,
+                    "bridge_name": "Kitchen Bridge",
+                    "mode": "all_domains",
+                    "include_domains": [],
+                    "include_entities": [],
+                    "exclude_entities": [],
+                },
+                "living_room": {
+                    "area_id": "living_room",
+                    "enabled": True,
+                    "bridge_name": "Living Room Bridge",
+                    "mode": "all_domains",
+                    "include_domains": [],
+                    "include_entities": [],
+                    "exclude_entities": [],
+                },
+            }
+        }
+        resp = client.post("/api/apply", json=config)
+        assert resp.status_code == 200
+        data = resp.json()
+        assert len(data["bridges"]) == 2
+        names = {b["name"] for b in data["bridges"]}
+        assert "Kitchen Bridge" in names
+        assert "Living Room Bridge" in names
+        assert data["entity_count_per_bridge"]["Kitchen Bridge"] == 2
+        assert data["entity_count_per_bridge"]["Living Room Bridge"] == 1
+
+    def test_apply_packages_configured_true(self, mock_ha_data, tmp_path):
+        """packages_configured should be True when configuration.yaml has packages."""
+        areas, devices, entities = mock_ha_data
+        ha_config_dir = tmp_path / "ha_config"
+        ha_config_dir.mkdir()
+        (ha_config_dir / "configuration.yaml").write_text(
+            "homeassistant:\n  packages: !include_dir_named packages\n"
+        )
+        ha_client = MockHAClient(areas=areas, devices=devices, entities=entities)
+        application = create_app(
+            ha_client=ha_client,
+            frontend_dir=FRONTEND_DIR,
+            ha_config_dir=ha_config_dir,
+            data_dir=tmp_path / "data",
+        )
+        with TestClient(application) as c:
+            config = {
+                "areas": {
+                    "kitchen": {
+                        "area_id": "kitchen",
+                        "enabled": True,
+                        "bridge_name": "Kitchen Bridge",
+                        "mode": "all_domains",
+                        "include_domains": [],
+                        "include_entities": [],
+                        "exclude_entities": [],
+                    }
+                }
+            }
+            resp = c.post("/api/apply", json=config)
+            assert resp.status_code == 200
+            assert resp.json()["packages_configured"] is True
 
     def test_apply_no_bridges_returns_400(self, client):
         config = {"areas": {}}

@@ -37,6 +37,15 @@ class NormalizePathMiddleware:
         await self.app(scope, receive, send)
 
 
+def _packages_configured(ha_config_dir: Path) -> bool:
+    """Check whether configuration.yaml references the packages directory."""
+    config_file = ha_config_dir / "configuration.yaml"
+    if not config_file.exists():
+        return False
+    content = config_file.read_text()
+    return "packages" in content
+
+
 def create_app(
     ha_client: HAClient | None = None,
     frontend_dir: Path | None = None,
@@ -170,7 +179,9 @@ def create_app(
         return {
             "status": "ok",
             "file": str(output_file),
-            "bridges": len(result.bridges),
+            "bridges": [b.model_dump() for b in result.bridges],
+            "entity_count_per_bridge": result.entity_count_per_bridge,
+            "packages_configured": _packages_configured(ha_config_dir),
             "message": "Configuration written. Restart Home Assistant to apply changes.",
         }
 
@@ -183,6 +194,7 @@ def create_app(
         return {
             "ha_connected": ha_connected,
             "packages_dir_exists": packages_exists,
+            "packages_configured": _packages_configured(ha_config_dir),
             "yaml_exists": yaml_exists,
             "yaml_content": yaml_content,
             "output_file": str(output_file),

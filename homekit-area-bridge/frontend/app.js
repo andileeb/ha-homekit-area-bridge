@@ -402,6 +402,64 @@ async function onGenerate() {
     }
 }
 
+function showResultOverlay(data) {
+    const bridges = data.bridges || [];
+    const entityCounts = data.entity_count_per_bridge || {};
+
+    const bridgeRows = bridges.map(b => {
+        const count = entityCounts[b.name] || 0;
+        return `<tr><td>${escHtml(b.name)}</td><td class="port">${b.port}</td><td>${count}</td></tr>`;
+    }).join('');
+
+    let warningHtml = '';
+    if (data.packages_configured === false) {
+        warningHtml = `
+            <div class="result-warning">
+                <div>
+                    <strong>Packages not detected in configuration.yaml</strong><br>
+                    Add this to your <code>configuration.yaml</code> for HA to load the bridges:
+                    <code>homeassistant:\n  packages: !include_dir_named packages</code>
+                </div>
+            </div>`;
+    }
+
+    const steps = [
+        { title: 'Restart Home Assistant', desc: 'Go to Settings \u2192 System \u2192 Restart. Required for bridge changes to take effect.' },
+        { title: 'Find pairing codes', desc: 'After restart, check Notifications in the HA sidebar. Each new bridge shows a QR code and 8-digit setup code.' },
+        { title: 'Add to Apple Home', desc: 'Open the Home app on your iPhone or iPad, tap +, then "Add Accessory" and scan the QR code or enter the setup code.' },
+    ];
+
+    const stepsHtml = steps.map((s, i) => `
+        <li>
+            <span class="result-step-number">${i + 1}</span>
+            <div class="result-step-text">
+                <strong>${escHtml(s.title)}</strong>
+                <span>${escHtml(s.desc)}</span>
+            </div>
+        </li>`).join('');
+
+    const overlay = document.createElement('div');
+    overlay.className = 'result-overlay';
+    overlay.innerHTML = `
+        <div class="result-overlay-content">
+            <h2>Configuration Written</h2>
+            ${warningHtml}
+            <table class="result-bridge-table">
+                <thead><tr><th>Bridge</th><th>Port</th><th>Entities</th></tr></thead>
+                <tbody>${bridgeRows}</tbody>
+            </table>
+            <h3>Next Steps</h3>
+            <ol class="result-steps">${stepsHtml}</ol>
+            <div class="result-overlay-actions">
+                <button class="btn btn-primary" id="btn-dismiss-result">Done</button>
+            </div>
+        </div>`;
+
+    document.body.appendChild(overlay);
+    overlay.querySelector('#btn-dismiss-result').addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+}
+
 async function onApply() {
     const btn = document.getElementById('btn-apply');
     btn.disabled = true;
@@ -409,7 +467,7 @@ async function onApply() {
 
     try {
         const result = await api('POST', 'api/apply', { areas: state.config });
-        showToast('Configuration written! Restart Home Assistant to apply.', 'success');
+        showResultOverlay(result);
     } catch (e) {
         showToast('Failed to write config: ' + e.message, 'error');
     } finally {
