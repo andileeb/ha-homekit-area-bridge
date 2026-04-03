@@ -1,0 +1,1 @@
+# ha-homekit-area-bridge
