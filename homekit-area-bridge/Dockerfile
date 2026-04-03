@@ -3,8 +3,13 @@ FROM ${BUILD_FROM}
 
 WORKDIR /
 
+# Build deps for aiohttp/websockets C extensions, removed after pip install
+RUN apk add --no-cache --virtual .build-deps \
+        gcc musl-dev python3-dev
+
 COPY requirements.txt /tmp/
-RUN pip3 install --no-cache-dir -r /tmp/requirements.txt
+RUN pip3 install --no-cache-dir -r /tmp/requirements.txt \
+    && apk del .build-deps
 
 COPY app/ /app/
 COPY frontend/ /frontend/

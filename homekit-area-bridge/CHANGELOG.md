@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.3
+
+- Refactor to app factory pattern for testability
+- Add build deps (gcc, musl-dev) to Dockerfile for aiohttp C extensions on Alpine
+- Relax version pins to allow compatible versions
+- Add 21 route tests covering all API endpoints, ingress, and static files
+- Make ConfigStore path injectable
+
 ## 0.1.2
 
 - Fix "Not Found" on UI load: move static file mount after route registration
