@@ -58,6 +58,9 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="HomeKit Area Bridge", lifespan=lifespan)
 
 
+FRONTEND_DIR = Path("/frontend")
+
+
 @app.middleware("http")
 async def ingress_middleware(request: Request, call_next):
     """Extract X-Ingress-Path header and store it on request state."""
@@ -66,16 +69,17 @@ async def ingress_middleware(request: Request, call_next):
     return response
 
 
-# Mount static files for frontend assets
-app.mount("/static", StaticFiles(directory="/frontend"), name="static")
-
-
 @app.get("/", response_class=HTMLResponse)
 async def index(request: Request):
     """Serve the main UI with ingress path injected."""
     ingress_path = request.state.ingress_path
-    with open("/frontend/index.html") as f:
-        html = f.read()
+    index_file = FRONTEND_DIR / "index.html"
+    if not index_file.exists():
+        return HTMLResponse(
+            f"<h1>Frontend not found</h1><p>Expected at {index_file}</p>",
+            status_code=500,
+        )
+    html = index_file.read_text()
     html = html.replace("__INGRESS_PATH__", ingress_path)
     return HTMLResponse(html)
 
@@ -188,3 +192,10 @@ async def refresh():
     """Re-fetch data from HA registries."""
     await _refresh_data()
     return {"status": "ok"}
+
+
+# Mount static files AFTER all routes so a mount failure can't prevent route registration
+if FRONTEND_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
+else:
+    logger.warning(f"Frontend directory {FRONTEND_DIR} not found, static files unavailable")
