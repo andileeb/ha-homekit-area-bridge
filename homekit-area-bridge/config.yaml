@@ -18,8 +18,7 @@ panel_title: HomeKit Bridges
 homeassistant_api: true
 hassio_api: true
 map:
-  - type: homeassistant_config
-    read_only: false
+  - homeassistant_config:rw
 options:
   log_level: info
   homekit_start_port: 21100
