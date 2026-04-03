@@ -146,6 +146,13 @@ class TestIndex:
         assert "/api/hassio_ingress/TOKEN123" in resp.text
         assert "__INGRESS_PATH__" not in resp.text
 
+    def test_get_double_slash_returns_html(self, client):
+        """HA ingress proxy sends // as the path — must still serve index."""
+        resp = client.get("//")
+        assert resp.status_code == 200
+        assert "text/html" in resp.headers["content-type"]
+        assert "HomeKit Area Bridge" in resp.text
+
     def test_empty_ingress_path(self, client):
         resp = client.get("/")
         assert resp.status_code == 200

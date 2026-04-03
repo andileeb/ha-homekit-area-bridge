@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import logging
 import os
+import re
 from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 from app.config_store import ConfigStore
 from app.generator import generate_homekit_yaml
@@ -16,6 +18,23 @@ from app.models import Area, AreaConfig, AreaSummary, ResolvedEntity, UserConfig
 from app.resolver import build_area_summaries, resolve_entities, resolve_from_raw
 
 logger = logging.getLogger(__name__)
+
+
+class NormalizePathMiddleware:
+    """Collapse consecutive slashes in the URL path.
+
+    HA's ingress proxy sends ``//`` as the request path. FastAPI's
+    ``@app.get("/")`` only matches a single ``/``, so the request 404s.
+    This ASGI middleware rewrites ``//+`` → ``/`` before routing.
+    """
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] == "http":
+            scope["path"] = re.sub(r"//+", "/", scope["path"])
+        await self.app(scope, receive, send)
 
 
 def create_app(
@@ -67,6 +86,7 @@ def create_app(
             pass
 
     app = FastAPI(title="HomeKit Area Bridge", lifespan=lifespan)
+    app.add_middleware(NormalizePathMiddleware)
 
     @app.middleware("http")
     async def ingress_middleware(request: Request, call_next):

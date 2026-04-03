@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.4
+
+- Fix 404 on UI load: HA ingress proxy sends `//` (double slash) as the request path; add ASGI middleware to normalize `//` → `/` before routing
+
 ## 0.1.3
 
 - Refactor to app factory pattern for testability
