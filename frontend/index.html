@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HomeKit Area Bridge</title>
+    <base href="__INGRESS_PATH__/">
+    <link rel="stylesheet" href="static/styles.css">
+</head>
+<body>
+    <header>
+        <h1>HomeKit Area Bridge</h1>
+        <div id="status-bar"></div>
+    </header>
+    <main>
+        <section id="area-list">
+            <p>Loading areas...</p>
+        </section>
+        <section id="yaml-preview" class="hidden"></section>
+    </main>
+    <footer>
+        <button id="btn-refresh" class="btn btn-secondary">Refresh from HA</button>
+        <button id="btn-generate" class="btn btn-primary">Preview YAML</button>
+        <button id="btn-apply" class="btn btn-success" disabled>Write to Config</button>
+    </footer>
+    <script src="static/app.js"></script>
+</body>
+</html>

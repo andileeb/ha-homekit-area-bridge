@@ -1,0 +1,28 @@
+name: "HomeKit Area Bridge"
+version: "0.1.0"
+slug: homekit_area_bridge
+description: "Auto-generate HomeKit bridge configuration grouped by Home Assistant areas"
+url: "https://github.com/andileeb/ha-homekit-area-bridge"
+arch:
+  - amd64
+  - aarch64
+  - armv7
+  - i386
+startup: application
+boot: auto
+ingress: true
+ingress_port: 8099
+ingress_entry: /
+panel_icon: mdi:home-automation
+panel_title: HomeKit Bridges
+homeassistant_api: true
+hassio_api: true
+map:
+  - type: homeassistant_config
+    read_only: false
+options:
+  log_level: info
+  homekit_start_port: 21100
+schema:
+  log_level: list(debug|info|warning|error)
+  homekit_start_port: port
