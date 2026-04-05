@@ -18,6 +18,7 @@ from app.models import Area, AreaConfig, AreaSummary, ResolvedEntity, UserConfig
 from app.resolver import build_area_summaries, resolve_entities, resolve_from_raw
 
 logger = logging.getLogger(__name__)
+VERSION = "0.1.7"
 
 
 class NormalizePathMiddleware:
@@ -116,6 +117,7 @@ def create_app(
             )
         html = index_file.read_text()
         html = html.replace("__INGRESS_PATH__", ingress_path)
+        html = html.replace("__VERSION__", VERSION)
         return HTMLResponse(html)
 
     @app.get("/api/health")
