@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.9
+
+- Minimal Config now prefers physical devices (lights, switches, covers, climate, etc.) and skips automations, scripts, scenes, helpers, persons, and device trackers
+
 ## 0.1.8
 
 - Dynamic Enable All / Disable All label syncs with individual area toggles

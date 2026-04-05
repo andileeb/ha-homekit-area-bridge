@@ -407,10 +407,21 @@ async function applyMinimalConfig() {
             config.enabled = true;
             config.mode = 'manual';
 
-            // Pick the first eligible entity
+            // Pick the first eligible physical entity (prefer lights, switches, etc.)
             const domains = state.areaEntities[area.area_id] || {};
+            const skipDomains = new Set([
+                'automation', 'script', 'scene', 'input_boolean',
+                'input_button', 'input_select', 'select', 'person', 'device_tracker',
+            ]);
+            const preferredOrder = [
+                'light', 'switch', 'cover', 'climate', 'fan', 'lock',
+                'sensor', 'binary_sensor', 'media_player', 'camera',
+                'vacuum', 'humidifier', 'valve', 'water_heater',
+                'alarm_control_panel', 'remote',
+            ];
             let picked = null;
-            for (const domain of Object.keys(domains).sort()) {
+            for (const domain of preferredOrder) {
+                if (skipDomains.has(domain)) continue;
                 const entities = domains[domain] || [];
                 const eligible = entities.find(e =>
                     e.homekit_supported && !e.disabled && !e.hidden && !e.entity_category
