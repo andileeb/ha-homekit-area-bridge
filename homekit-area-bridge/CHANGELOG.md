@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.8
+
+- Dynamic Enable All / Disable All label syncs with individual area toggles
+- Add confirmation dialog before applying Minimal Config to prevent accidental overwrite
+- Add cache-busting version query param to static assets to prevent stale JS/CSS after updates
+
 ## 0.1.7
 
 - Add "Enable All / Disable All" bulk toggle button

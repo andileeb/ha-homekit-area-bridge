@@ -299,6 +299,7 @@ function toggleAreaEnabled(areaId, enabled) {
     const card = document.querySelector(`.area-card[data-area-id="${areaId}"]`);
     card.classList.toggle('disabled-area', !enabled);
 
+    updateToggleAllLabel();
     saveConfig();
     clearPreview();
 }
@@ -382,6 +383,15 @@ function toggleAllAreas() {
 }
 
 async function applyMinimalConfig() {
+    const confirmed = confirm(
+        'This will override your current configuration:\n\n' +
+        '• Enable all areas\n' +
+        '• Set each to Manual mode with only 1 entity\n' +
+        '• Clear all exclusions\n\n' +
+        'Continue?'
+    );
+    if (!confirmed) return;
+
     const btn = document.getElementById('btn-minimal');
     btn.disabled = true;
     btn.textContent = 'Loading...';
