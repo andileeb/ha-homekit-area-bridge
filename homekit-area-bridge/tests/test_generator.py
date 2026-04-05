@@ -136,7 +136,8 @@ class TestGenerateHomekitYaml:
         result = generate_homekit_yaml(configs, entities, start_port=21100)
         assert len(result.bridges) == 0
 
-    def test_empty_area_skipped(self):
+    def test_empty_area_creates_bridge(self):
+        """Enabled area with no entities still creates a bridge (for HomeKit room setup)."""
         entities = {"kitchen": []}
         configs = [
             AreaConfig(
@@ -146,7 +147,9 @@ class TestGenerateHomekitYaml:
             )
         ]
         result = generate_homekit_yaml(configs, entities, start_port=21100)
-        assert len(result.bridges) == 0
+        assert len(result.bridges) == 1
+        assert result.bridges[0].name == "Kitchen Bridge"
+        assert result.bridges[0].filter["include_entities"] == []
 
     def test_disabled_entities_filtered_out(self):
         entities = {

@@ -43,6 +43,18 @@ A Home Assistant app that automatically generates one HomeKit bridge per area (r
 7. Click **Write to Config** to save
 8. Restart Home Assistant to apply
 
+## Tip: Set up rooms in Apple Home first
+
+When you add a HomeKit bridge to Apple Home, all its entities are placed in the same room. To take advantage of this:
+
+1. Enable an area bridge **even if it has no entities yet** — empty bridges are allowed
+2. Write the config and restart Home Assistant
+3. Pair the bridge in the Apple Home app and assign it to the matching room
+4. Then go back to the app UI and add entities to the bridge
+5. After restarting HA, all new entities will automatically appear in the correct Apple Home room
+
+This avoids having to manually move dozens of entities between rooms in Apple Home.
+
 ## Configuration Options
 
 | Option | Default | Description |

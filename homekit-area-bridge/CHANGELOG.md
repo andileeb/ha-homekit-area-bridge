@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.6
+
+- Allow empty bridges: enabled areas with no entities still generate a bridge for HomeKit room setup
+- Add "set up rooms first" workflow tip to README
+
 ## 0.1.5
 
 - Add post-apply result overlay with bridge details (name, port, entity count) and pairing instructions

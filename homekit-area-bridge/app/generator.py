@@ -64,9 +64,6 @@ def generate_homekit_yaml(
             if eid in {e.entity_id for e in candidates} and eid in set(included)
         )
 
-        if not final_included:
-            continue
-
         # Unique name
         name = _unique_name(config.bridge_name, used_names)
         used_names.add(name)
