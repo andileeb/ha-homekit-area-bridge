@@ -2,8 +2,7 @@
 
 ## 0.1.6
 
-- Allow empty bridges: enabled areas with no entities still generate a bridge for HomeKit room setup
-- Add "set up rooms first" workflow tip to README
+- Add "automatic room placement" workflow tip to README: start with one entity per bridge, pair in Apple Home, then add the rest
 
 ## 0.1.5
 
