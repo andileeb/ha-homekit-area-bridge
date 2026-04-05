@@ -65,6 +65,18 @@ main {
     padding: 24px 16px 100px;
 }
 
+/* Bulk actions toolbar */
+.bulk-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.btn-small {
+    padding: 6px 14px;
+    font-size: 13px;
+}
+
 /* Area cards */
 .area-card {
     background: var(--card-bg);

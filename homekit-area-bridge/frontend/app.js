@@ -367,6 +367,73 @@ function filterEntities(areaId, query) {
     }
 }
 
+function toggleAllAreas() {
+    const allEnabled = state.areas.every(a => state.config[a.area_id]?.enabled);
+    const newState = !allEnabled;
+    for (const area of state.areas) {
+        if (state.config[area.area_id]) {
+            state.config[area.area_id].enabled = newState;
+        }
+    }
+    renderAreaList();
+    updateToggleAllLabel();
+    saveConfig();
+    clearPreview();
+}
+
+async function applyMinimalConfig() {
+    const btn = document.getElementById('btn-minimal');
+    btn.disabled = true;
+    btn.textContent = 'Loading...';
+
+    try {
+        // Load entities for all areas in parallel
+        await Promise.all(state.areas.map(a => loadAreaEntities(a.area_id)));
+
+        for (const area of state.areas) {
+            const config = state.config[area.area_id];
+            if (!config) continue;
+
+            config.enabled = true;
+            config.mode = 'manual';
+
+            // Pick the first eligible entity
+            const domains = state.areaEntities[area.area_id] || {};
+            let picked = null;
+            for (const domain of Object.keys(domains).sort()) {
+                const entities = domains[domain] || [];
+                const eligible = entities.find(e =>
+                    e.homekit_supported && !e.disabled && !e.hidden && !e.entity_category
+                );
+                if (eligible) {
+                    picked = eligible.entity_id;
+                    break;
+                }
+            }
+            config.include_entities = picked ? [picked] : [];
+            config.exclude_entities = [];
+        }
+
+        renderAreaList();
+        updateToggleAllLabel();
+        saveConfig();
+        clearPreview();
+        showToast('Minimal config applied — 1 entity per bridge', 'success');
+    } catch (e) {
+        showToast('Failed to apply minimal config: ' + e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Minimal Config';
+    }
+}
+
+function updateToggleAllLabel() {
+    const btn = document.getElementById('btn-toggle-all');
+    if (!btn) return;
+    const allEnabled = state.areas.every(a => state.config[a.area_id]?.enabled);
+    btn.textContent = allEnabled ? 'Disable All' : 'Enable All';
+}
+
 function clearPreview() {
     state.yamlPreview = null;
     state.yamlWarnings = [];
@@ -516,6 +583,7 @@ async function init() {
         await loadAreas();
         await loadSavedConfig();
         renderAreaList();
+        updateToggleAllLabel();
         statusBar.textContent = `${state.areas.length} areas loaded`;
     } catch (e) {
         statusBar.textContent = 'Error: ' + e.message;
@@ -528,6 +596,8 @@ async function init() {
     document.getElementById('btn-generate').addEventListener('click', onGenerate);
     document.getElementById('btn-apply').addEventListener('click', onApply);
     document.getElementById('btn-refresh').addEventListener('click', onRefresh);
+    document.getElementById('btn-toggle-all').addEventListener('click', toggleAllAreas);
+    document.getElementById('btn-minimal').addEventListener('click', applyMinimalConfig);
 }
 
 init();

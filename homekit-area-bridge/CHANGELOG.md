@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.7
+
+- Add "Enable All / Disable All" bulk toggle button
+- Add "Minimal Config" button: enables all areas with 1 entity each for quick HomeKit room setup
+
 ## 0.1.6
 
 - Add "automatic room placement" workflow tip to README: start with one entity per bridge, pair in Apple Home, then add the rest
