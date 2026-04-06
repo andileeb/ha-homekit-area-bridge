@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import difflib
 import logging
 import os
 import re
@@ -18,7 +19,7 @@ from app.models import Area, AreaConfig, AreaSummary, ResolvedEntity, UserConfig
 from app.resolver import build_area_summaries, resolve_entities, resolve_from_raw
 
 logger = logging.getLogger(__name__)
-VERSION = "0.1.9"
+VERSION = "0.2.0"
 
 
 class NormalizePathMiddleware:
@@ -158,7 +159,21 @@ def create_app(
         start_port = int(os.environ.get("HOMEKIT_START_PORT", "21100"))
         area_configs = list(config.areas.values())
         result = generate_homekit_yaml(area_configs, area_entities, start_port)
-        return result.model_dump()
+
+        current = output_file.read_text() if output_file.exists() else ""
+        diff_lines = list(difflib.unified_diff(
+            current.splitlines(keepends=True),
+            result.yaml_content.splitlines(keepends=True),
+            fromfile="current",
+            tofile="new",
+            lineterm="",
+        ))
+        return {
+            **result.model_dump(),
+            "current_yaml": current,
+            "diff": "\n".join(diff_lines),
+            "has_changes": current != result.yaml_content,
+        }
 
     @app.post("/api/apply")
     async def apply(config: UserConfig):

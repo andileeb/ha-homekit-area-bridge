@@ -279,6 +279,48 @@ class TestGenerate:
         assert data["bridges"][0]["name"] == "Kitchen Bridge"
         assert "yaml_content" in data
         assert "homekit:" in data["yaml_content"]
+        # Diff fields present
+        assert "has_changes" in data
+        assert "diff" in data
+        assert "current_yaml" in data
+        # No file on disk yet, so everything is new
+        assert data["has_changes"] is True
+        assert data["current_yaml"] == ""
+
+    def test_generate_diff_with_existing_file(self, mock_ha_data, tmp_path):
+        """Diff should show changes when an existing YAML file differs."""
+        areas, devices, entities = mock_ha_data
+        ha_config_dir = tmp_path / "ha_config"
+        packages_dir = ha_config_dir / "packages"
+        packages_dir.mkdir(parents=True)
+        (packages_dir / "homekit_area_bridge.yaml").write_text("old: content\n")
+        ha_client = MockHAClient(areas=areas, devices=devices, entities=entities)
+        application = create_app(
+            ha_client=ha_client,
+            frontend_dir=FRONTEND_DIR,
+            ha_config_dir=ha_config_dir,
+            data_dir=tmp_path / "data",
+        )
+        with TestClient(application) as c:
+            config = {
+                "areas": {
+                    "kitchen": {
+                        "area_id": "kitchen",
+                        "enabled": True,
+                        "bridge_name": "Kitchen Bridge",
+                        "mode": "all_domains",
+                        "include_domains": [],
+                        "include_entities": [],
+                        "exclude_entities": [],
+                    }
+                }
+            }
+            resp = c.post("/api/generate", json=config)
+            data = resp.json()
+            assert data["has_changes"] is True
+            assert data["current_yaml"] == "old: content\n"
+            assert "-old: content" in data["diff"]
+            assert "+homekit:" in data["diff"] or "+ " in data["diff"]
 
     def test_generate_no_enabled_areas(self, client):
         config = {

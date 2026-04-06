@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.0
+
+- Add "Show Diff" button to compare generated YAML against current on-disk config before applying
+- Color-coded diff overlay: green for additions, red for removals, with unified diff format
+- `/api/generate` now returns `diff`, `has_changes`, and `current_yaml` fields
+
 ## 0.1.9
 
 - Minimal Config now prefers physical devices (lights, switches, covers, climate, etc.) and skips automations, scripts, scenes, helpers, persons, and device trackers

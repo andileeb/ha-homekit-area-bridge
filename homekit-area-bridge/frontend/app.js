@@ -8,6 +8,8 @@ const state = {
     yamlPreview: null,      // string
     yamlWarnings: [],       // string[]
     yamlBridges: [],        // BridgeConfig[]
+    yamlDiff: '',           // unified diff string
+    yamlHasChanges: false,  // whether new differs from current
 };
 
 // ── API helpers ────────────────────────────────────────────────────
@@ -459,8 +461,11 @@ function clearPreview() {
     state.yamlPreview = null;
     state.yamlWarnings = [];
     state.yamlBridges = [];
+    state.yamlDiff = '';
+    state.yamlHasChanges = false;
     document.getElementById('yaml-preview').classList.add('hidden');
     document.getElementById('btn-apply').disabled = true;
+    document.getElementById('btn-diff').disabled = true;
 }
 
 // ── Button actions ─────────────────────────────────────────────────
@@ -474,12 +479,15 @@ async function onGenerate() {
         state.yamlPreview = result;
         state.yamlWarnings = result.warnings || [];
         state.yamlBridges = result.bridges || [];
+        state.yamlDiff = result.diff || '';
+        state.yamlHasChanges = result.has_changes || false;
 
         if (!result.bridges.length) {
             showToast('No bridges to generate. Enable at least one area with entities.', 'info');
             clearPreview();
         } else {
             renderYamlPreview();
+            document.getElementById('btn-diff').disabled = false;
             showToast(`Generated ${result.bridges.length} bridge(s)`, 'success');
         }
     } catch (e) {
@@ -488,6 +496,38 @@ async function onGenerate() {
         btn.disabled = false;
         btn.textContent = 'Preview YAML';
     }
+}
+
+function onShowDiff() {
+    if (!state.yamlHasChanges) {
+        showToast('No changes from current config', 'info');
+        return;
+    }
+
+    const lines = state.yamlDiff.split('\n');
+    const diffHtml = lines.map(line => {
+        let cls = 'context';
+        if (line.startsWith('+++') || line.startsWith('---')) cls = 'meta';
+        else if (line.startsWith('@@')) cls = 'header';
+        else if (line.startsWith('+')) cls = 'added';
+        else if (line.startsWith('-')) cls = 'removed';
+        return `<div class="diff-line ${cls}">${escHtml(line)}</div>`;
+    }).join('');
+
+    const overlay = document.createElement('div');
+    overlay.className = 'result-overlay';
+    overlay.innerHTML = `
+        <div class="diff-overlay-content">
+            <h2>Changes</h2>
+            <div class="diff-container">${diffHtml || '<div class="diff-empty">No differences</div>'}</div>
+            <div class="diff-overlay-actions">
+                <button class="btn btn-primary" id="btn-dismiss-diff">Close</button>
+            </div>
+        </div>`;
+
+    document.body.appendChild(overlay);
+    overlay.querySelector('#btn-dismiss-diff').addEventListener('click', () => overlay.remove());
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
 }
 
 function showResultOverlay(data) {
@@ -615,6 +655,7 @@ async function init() {
 
     // Wire up buttons
     document.getElementById('btn-generate').addEventListener('click', onGenerate);
+    document.getElementById('btn-diff').addEventListener('click', onShowDiff);
     document.getElementById('btn-apply').addEventListener('click', onApply);
     document.getElementById('btn-refresh').addEventListener('click', onRefresh);
     document.getElementById('btn-toggle-all').addEventListener('click', toggleAllAreas);
