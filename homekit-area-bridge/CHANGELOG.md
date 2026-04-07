@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.1
+
+- Add GitHub Actions release workflow: automatically creates a GitHub Release with changelog notes when the version is bumped on main
+
 ## 0.3.0
 
 - Add automatic dark mode support: UI follows Home Assistant's theme setting via `prefers-color-scheme` media query
