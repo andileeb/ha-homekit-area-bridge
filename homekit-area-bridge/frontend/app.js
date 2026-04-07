@@ -90,7 +90,7 @@ async function saveConfig() {
 function renderAreaList() {
     const container = document.getElementById('area-list');
     if (!state.areas.length) {
-        container.innerHTML = '<p style="text-align:center;color:#757575;padding:40px">No areas found in Home Assistant.</p>';
+        container.innerHTML = '<p style="text-align:center;color:var(--text-secondary);padding:40px">No areas found in Home Assistant.</p>';
         return;
     }
 
@@ -650,7 +650,7 @@ async function init() {
         statusBar.textContent = 'Error: ' + e.message;
         statusBar.classList.add('error');
         document.getElementById('area-list').innerHTML =
-            '<p style="text-align:center;color:#f44336;padding:40px">Failed to connect to Home Assistant.<br>Check the app logs.</p>';
+            '<p style="text-align:center;color:var(--danger-color);padding:40px">Failed to connect to Home Assistant.<br>Check the app logs.</p>';
     }
 
     // Wire up buttons

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0
+
+- Add automatic dark mode support: UI follows Home Assistant's theme setting via `prefers-color-scheme` media query
+- Replace hardcoded colors with CSS custom properties for consistent theming
+- Add `color-scheme: light dark` for native form control theming
+
 ## 0.2.0
 
 - Add "Show Diff" button to compare generated YAML against current on-disk config before applying

@@ -19,7 +19,7 @@ from app.models import Area, AreaConfig, AreaSummary, ResolvedEntity, UserConfig
 from app.resolver import build_area_summaries, resolve_entities, resolve_from_raw
 
 logger = logging.getLogger(__name__)
-VERSION = "0.2.0"
+VERSION = "0.3.0"
 
 
 class NormalizePathMiddleware:
