@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.2
+
+- Sort entities alphabetically by name in Manual mode entity selector
+
 ## 0.3.1
 
 - Add GitHub Actions release workflow: automatically creates a GitHub Release with changelog notes when the version is bumped on main

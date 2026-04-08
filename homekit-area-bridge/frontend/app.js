@@ -217,7 +217,8 @@ function renderEntitySelector(areaId, domains, entitiesByDomain) {
             <div class="entity-list" id="entity-list-${areaId}">
                 ${domains.map(domain => {
                     const entities = (entitiesByDomain[domain] || [])
-                        .filter(e => e.homekit_supported && !e.disabled && !e.hidden && !e.entity_category);
+                        .filter(e => e.homekit_supported && !e.disabled && !e.hidden && !e.entity_category)
+                        .sort((a, b) => a.name.localeCompare(b.name));
                     if (!entities.length) return '';
                     return `
                     <div class="entity-domain-group" data-domain="${domain}">
