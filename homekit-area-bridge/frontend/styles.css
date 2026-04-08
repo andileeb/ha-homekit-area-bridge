@@ -309,6 +309,9 @@ main {
 }
 
 .entity-domain-group h4 {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     font-size: 13px;
     color: var(--text-secondary);
     text-transform: uppercase;
@@ -316,6 +319,11 @@ main {
     margin-bottom: 6px;
     padding-bottom: 4px;
     border-bottom: 1px solid var(--border-color);
+}
+
+.domain-toggle {
+    margin: 0;
+    cursor: pointer;
 }
 
 .entity-item {

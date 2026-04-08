@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.3.4
+
+- Add "toggle all" checkbox per domain in Manual mode to quickly select or deselect all entities in a domain
+
 ## 0.3.3
 
 - Sort entities alphabetically by name in Manual mode entity selector

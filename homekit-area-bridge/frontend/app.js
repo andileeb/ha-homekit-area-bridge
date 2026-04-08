@@ -180,6 +180,10 @@ function renderAreaDetail(areaId) {
             ${renderExcludeList(areaId, domains, entitiesByDomain)}
         </details>
     `;
+
+    if (mode === 'manual') {
+        updateDomainToggles(areaId);
+    }
 }
 
 function renderDomainSelector(areaId, domains, entitiesByDomain) {
@@ -222,7 +226,12 @@ function renderEntitySelector(areaId, domains, entitiesByDomain) {
                     if (!entities.length) return '';
                     return `
                     <div class="entity-domain-group" data-domain="${domain}">
-                        <h4>${domain} (${entities.length})</h4>
+                        <h4>
+                            <input type="checkbox" class="domain-toggle"
+                                   onchange="toggleDomainEntities('${areaId}', '${domain}', this.checked)"
+                                   data-area="${areaId}" data-domain="${domain}">
+                            ${domain} (${entities.length})
+                        </h4>
                         ${entities.map(e => `
                         <div class="entity-item" data-entity-id="${e.entity_id}">
                             <input type="checkbox" ${included.has(e.entity_id) ? 'checked' : ''}
@@ -343,8 +352,46 @@ function toggleEntity(areaId, entityId, checked) {
         entities.delete(entityId);
     }
     config.include_entities = [...entities];
+    updateDomainToggles(areaId);
     saveConfig();
     clearPreview();
+}
+
+function toggleDomainEntities(areaId, domain, checked) {
+    const config = state.config[areaId];
+    const entities = new Set(config.include_entities || []);
+    const group = document.querySelector(
+        `#entity-list-${areaId} .entity-domain-group[data-domain="${domain}"]`
+    );
+    if (!group) return;
+    for (const item of group.querySelectorAll('.entity-item')) {
+        const id = item.dataset.entityId;
+        const cb = item.querySelector('input[type="checkbox"]');
+        if (checked) { entities.add(id); } else { entities.delete(id); }
+        if (cb) cb.checked = checked;
+    }
+    config.include_entities = [...entities];
+    saveConfig();
+    clearPreview();
+}
+
+function updateDomainToggles(areaId) {
+    const config = state.config[areaId] || {};
+    const included = new Set(config.include_entities || []);
+    const list = document.getElementById(`entity-list-${areaId}`);
+    if (!list) return;
+    for (const toggle of list.querySelectorAll('.domain-toggle')) {
+        const domain = toggle.dataset.domain;
+        const group = toggle.closest('.entity-domain-group');
+        const items = group.querySelectorAll('.entity-item');
+        let total = 0, checked = 0;
+        for (const item of items) {
+            total++;
+            if (included.has(item.dataset.entityId)) checked++;
+        }
+        toggle.checked = checked === total && total > 0;
+        toggle.indeterminate = checked > 0 && checked < total;
+    }
 }
 
 function toggleExclude(areaId, entityId, checked) {
