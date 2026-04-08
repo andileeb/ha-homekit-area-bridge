@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.2
+## 0.3.3
 
 - Sort entities alphabetically by name in Manual mode entity selector
 
