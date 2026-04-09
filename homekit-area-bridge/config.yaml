@@ -1,5 +1,5 @@
 name: "HomeKit Area Bridge"
-version: "0.4.0"
+version: "0.4.1"
 slug: homekit_area_bridge
 description: "Auto-generate HomeKit bridge configuration grouped by Home Assistant areas"
 url: "https://github.com/andileeb/ha-homekit-area-bridge"

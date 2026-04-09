@@ -511,6 +511,12 @@ footer {
     transition: all 0.15s;
 }
 
+.btn:has(.spinner) {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;

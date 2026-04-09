@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1
+
+- Fix loading spinner not vertically centered with button text
+
 ## 0.4.0
 
 - Add "Restart Now" button to the post-apply result overlay: restart Home Assistant directly without leaving the add-on, with confirmation prompt
