@@ -44,6 +44,9 @@ class MockHAClient(HAClient):
     async def fetch_all(self):
         return self._areas, self._devices, self._entities
 
+    async def restart_ha(self):
+        return True
+
 
 @pytest.fixture
 def mock_ha_data():
@@ -458,6 +461,36 @@ class TestRefresh:
         resp = client.post("/api/refresh")
         assert resp.status_code == 200
         assert resp.json()["status"] == "ok"
+
+
+# ── Restart ─────────────────────────────────────────────────────
+
+class TestRestart:
+    def test_restart_returns_ok(self, client):
+        resp = client.post("/api/restart")
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["status"] == "ok"
+
+    def test_restart_failure_returns_502(self, mock_ha_data, tmp_path):
+        areas, devices, entities = mock_ha_data
+        ha = MockHAClient(areas=areas, devices=devices, entities=entities)
+
+        async def failing_restart():
+            raise Exception("Connection refused")
+
+        ha.restart_ha = failing_restart
+
+        application = create_app(
+            ha_client=ha,
+            frontend_dir=FRONTEND_DIR,
+            ha_config_dir=tmp_path / "ha_config",
+            data_dir=tmp_path / "data",
+        )
+        with TestClient(application) as c:
+            resp = c.post("/api/restart")
+            assert resp.status_code == 502
+            assert "error" in resp.json()
 
 
 # ── Static files ────────────────────────────────────────────────

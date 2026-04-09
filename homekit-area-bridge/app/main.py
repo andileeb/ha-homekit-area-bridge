@@ -19,7 +19,7 @@ from app.models import Area, AreaConfig, AreaSummary, ResolvedEntity, UserConfig
 from app.resolver import build_area_summaries, resolve_entities, resolve_from_raw
 
 logger = logging.getLogger(__name__)
-VERSION = "0.3.4"
+VERSION = "0.4.0"
 
 
 class NormalizePathMiddleware:
@@ -221,6 +221,19 @@ def create_app(
     async def refresh():
         await refresh_data()
         return {"status": "ok"}
+
+    @app.post("/api/restart")
+    async def restart_ha():
+        try:
+            await ha_client.restart_ha()
+            logger.info("Home Assistant restart triggered via API")
+            return {"status": "ok", "message": "Home Assistant restart initiated."}
+        except Exception as e:
+            logger.error(f"Failed to trigger HA restart: {e}")
+            return JSONResponse(
+                status_code=502,
+                content={"error": f"Failed to trigger restart: {e}"},
+            )
 
     # ── Static files (after all routes) ─────────────────────────
 

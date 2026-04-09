@@ -544,6 +544,15 @@ footer {
     background: var(--success-dark);
 }
 
+.btn-warning {
+    background: var(--warning-color);
+    color: white;
+}
+
+.btn-warning:hover:not(:disabled) {
+    background: #f57c00;
+}
+
 /* Loading spinner */
 .spinner {
     display: inline-block;
@@ -606,8 +615,16 @@ footer {
     max-width: 520px;
     width: 90%;
     max-height: 80vh;
-    overflow-y: auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.result-overlay-body {
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
 }
 
 .result-overlay h2 {
@@ -654,7 +671,7 @@ footer {
 .result-step-text strong { display: block; font-size: 14px; margin-bottom: 2px; }
 .result-step-text span { font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
 
-.result-overlay-actions { text-align: center; padding-top: 4px; }
+.result-overlay-actions { display: flex; justify-content: center; gap: 12px; padding-top: 12px; flex-shrink: 0; }
 
 .result-overlay h3 { font-size: 15px; font-weight: 500; margin: 0 0 12px; }
 

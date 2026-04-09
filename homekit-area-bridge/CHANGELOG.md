@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.0
+
+- Add "Restart Now" button to the post-apply result overlay: restart Home Assistant directly without leaving the add-on, with confirmation prompt
+- Make result overlay buttons sticky at the bottom so they remain visible when the bridge list is long
+
 ## 0.3.4
 
 - Add "toggle all" checkbox per domain in Manual mode to quickly select or deselect all entities in a domain

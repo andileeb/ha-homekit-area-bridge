@@ -112,6 +112,27 @@ class HAClient:
                     )
                 return await resp.json()
 
+    async def restart_ha(self) -> bool:
+        """Trigger a Home Assistant restart via the REST API.
+
+        Uses REST rather than WebSocket because the WS connection will be
+        severed during the restart process.
+        """
+        headers = {
+            "Authorization": f"Bearer {self.token}",
+            "Content-Type": "application/json",
+        }
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                f"{self.rest_url}/services/homeassistant/restart",
+                headers=headers,
+            ) as resp:
+                if resp.status != 200:
+                    raise HAClientError(
+                        f"Failed to trigger restart: HTTP {resp.status}"
+                    )
+                return True
+
     async def fetch_all(self) -> tuple[list[dict], list[dict], list[dict]]:
         """Fetch areas, devices, and entities in parallel."""
         await self._ensure_connected()

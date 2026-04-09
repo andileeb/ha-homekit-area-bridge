@@ -600,7 +600,7 @@ function showResultOverlay(data) {
     }
 
     const steps = [
-        { title: 'Restart Home Assistant', desc: 'Go to Settings \u2192 System \u2192 Restart. Required for bridge changes to take effect.' },
+        { title: 'Restart Home Assistant', desc: 'Use the "Restart Now" button below, or go to Settings \u2192 System \u2192 Restart. Required for bridge changes to take effect.' },
         { title: 'Find pairing codes', desc: 'After restart, check Notifications in the HA sidebar. Each new bridge shows a QR code and 8-digit setup code.' },
         { title: 'Add to Apple Home', desc: 'Open the Home app on your iPhone or iPad, tap +, then "Add Accessory" and scan the QR code or enter the setup code.' },
     ];
@@ -618,22 +618,59 @@ function showResultOverlay(data) {
     overlay.className = 'result-overlay';
     overlay.innerHTML = `
         <div class="result-overlay-content">
-            <h2>Configuration Written</h2>
-            ${warningHtml}
-            <table class="result-bridge-table">
-                <thead><tr><th>Bridge</th><th>Port</th><th>Entities</th></tr></thead>
-                <tbody>${bridgeRows}</tbody>
-            </table>
-            <h3>Next Steps</h3>
-            <ol class="result-steps">${stepsHtml}</ol>
+            <div class="result-overlay-body">
+                <h2>Configuration Written</h2>
+                ${warningHtml}
+                <table class="result-bridge-table">
+                    <thead><tr><th>Bridge</th><th>Port</th><th>Entities</th></tr></thead>
+                    <tbody>${bridgeRows}</tbody>
+                </table>
+                <h3>Next Steps</h3>
+                <ol class="result-steps">${stepsHtml}</ol>
+            </div>
             <div class="result-overlay-actions">
+                <button class="btn btn-warning" id="btn-restart-ha">Restart Now</button>
                 <button class="btn btn-primary" id="btn-dismiss-result">Done</button>
             </div>
         </div>`;
 
     document.body.appendChild(overlay);
     overlay.querySelector('#btn-dismiss-result').addEventListener('click', () => overlay.remove());
+    overlay.querySelector('#btn-restart-ha').addEventListener('click', () => onRestartHA(overlay));
     overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+}
+
+async function onRestartHA(overlay) {
+    const confirmed = confirm(
+        'Are you sure you want to restart Home Assistant?\n\n' +
+        'Home Assistant will be unavailable for a short time while it restarts. ' +
+        'This add-on will also restart.'
+    );
+    if (!confirmed) return;
+
+    const btn = document.getElementById('btn-restart-ha');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Restarting\u2026';
+
+    try {
+        await api('POST', 'api/restart');
+        const content = overlay.querySelector('.result-overlay-content');
+        if (content) {
+            content.innerHTML = `
+                <h2>Restarting Home Assistant</h2>
+                <p style="text-align:center; color: var(--text-secondary); margin: 24px 0;">
+                    <span class="spinner" style="width:24px;height:24px;border-width:3px;display:inline-block;vertical-align:middle;margin-right:8px"></span>
+                    Home Assistant is restarting. This page will become unresponsive shortly.
+                </p>
+                <p style="text-align:center; color: var(--text-secondary); font-size:13px;">
+                    After restart completes, refresh this page or reopen the add-on from the sidebar.
+                </p>`;
+        }
+    } catch (e) {
+        btn.disabled = false;
+        btn.textContent = 'Restart Now';
+        showToast('Failed to trigger restart: ' + e.message, 'error');
+    }
 }
 
 async function onApply() {
